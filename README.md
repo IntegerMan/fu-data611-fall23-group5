@@ -26,12 +26,12 @@ These notebooks were originally created in Azure Machine Learning Studio on a `L
 Ultimately, the notebooks were executed in two separate kernels to separate different Python dependencies, with the `Python 3.8 - AzureML` kernel being used for cleaning and splitting (including SMOTE) and a `Python 3 (ipykernel)` kernel used for model training and evaluation.
 
 ``` mermaid
-flowchart LR
-    subgraph AzureML
+flowchart TD
+    subgraph Python 3.8 AzureML Kernel
       nbClean[DataCleaningAndExploration.ipynb]
       nbSplit[TrainTestSplit.ipynb]
     end
-    subgraph ipython
+    subgraph Python 3 ipython Kernel
       nbAutoML[AutoML.ipynb]
       nbMetrics[ModelMetrics.ipynb]
     end
