@@ -1,0 +1,164 @@
+#!meta
+
+{"kernelInfo":{"defaultKernelName":"csharp","items":[{"aliases":[],"name":"csharp"}]}}
+
+#!markdown
+
+# Polyglot Notebooks version of FU-611 Final Project
+
+This notebook uses .NET and Polyglot Notebooks together to perform a binary classification experiment.
+
+#!markdown
+
+## Data Loading
+
+#!csharp
+
+// Load a DataFrame from the dataset
+string dataUrl = "credit_default.csv";
+
+#!csharp
+
+#r "nuget:Microsoft.Data.Analysis,0.21.0-preview.23511.1"
+
+using Microsoft.Data.Analysis;
+
+#!csharp
+
+DataFrame df = DataFrame.LoadCsv(dataUrl);
+df.Head(5)
+
+#!csharp
+
+df.Info()
+
+#!csharp
+
+df.Description()
+
+#!csharp
+
+df["X1"]
+
+#!csharp
+
+df["X1"].Description()
+
+#!csharp
+
+df["X1"].ValueCounts()
+
+#!markdown
+
+## Data Cleaning
+
+#!csharp
+
+// Rename columns to reflect actual data
+df["X1"].SetName("Credit Amount");
+df["X2"].SetName("Gender");
+df["X3"].SetName("Education");
+df["X4"].SetName("Marital Status");
+df["X5"].SetName("Age");
+df["X6"].SetName("Repay Delay Sep");
+df["X7"].SetName("Repay Delay Aug");
+df["X8"].SetName("Repay Delay Jul");
+df["X9"].SetName("Repay Delay Jun");
+df["X10"].SetName("Repay Delay May");
+df["X11"].SetName("Repay Delay Apr");
+df["X12"].SetName("Bill Sep");
+df["X13"].SetName("Bill Aug");
+df["X14"].SetName("Bill Jul");
+df["X15"].SetName("Bill Jun");
+df["X16"].SetName("Bill May");
+df["X17"].SetName("Bill Apr");
+df["X18"].SetName("Payment Sep");
+df["X19"].SetName("Payment Aug");
+df["X20"].SetName("Payment Jul");
+df["X21"].SetName("Payment Jun");
+df["X22"].SetName("Payment May");
+df["X23"].SetName("Payment Apr");
+df["Y"].SetName("Defaulted");
+
+// Display the new schema
+df.Info()
+
+#!csharp
+
+// Change the defaulted column to a boolean storing whether or not it has a 1
+df["Defaulted"] = df["Defaulted"].ElementwiseEquals(1)
+
+#!csharp
+
+df["Defaulted"].ValueCounts()
+
+#!markdown
+
+Talking about FillNulls and other null management aspects of this would be good.
+
+#!markdown
+
+## Data Exploration
+
+#!csharp
+
+/*
+#r "nuget:Plotly.NET.CSharp"
+#r "nuget:Plotly.NET.Interactive"
+
+using Plotly.NET.CSharp;
+using Plotly.NET.Interactive;
+*/
+
+#!csharp
+
+#r "nuget:XPlot.Plotly"
+#r "nuget:XPlot.Plotly.Interactive"
+
+#!csharp
+
+using XPlot.Plotly;
+using System.Linq;
+
+Chart.Plot(
+    new Histogram()
+    {
+        x = df["Defaulted"],
+        nbinsx = 30,        
+    },
+    new Layout.Layout() {
+        title="Default Class Distribution",        
+    }
+)
+
+#!csharp
+
+// Save the DataFrame to a file
+DataFrame.SaveCsv(df, "credit_default_clean.csv");
+
+#!csharp
+
+#r "nuget:FSharp.Data"
+
+#!fsharp
+
+open FSharp.Data
+
+// Load the cleaned data
+let df = CsvFile.Load("credit_default_clean.csv", inferRows = 1000)
+
+#!markdown
+
+## Feature Engineering
+
+#!markdown
+
+## Train / Test Split
+
+#!markdown
+
+## Model Training
+
+#!markdown
+
+## Model Evaluation
