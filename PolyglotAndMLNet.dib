@@ -95,6 +95,14 @@ Talking about FillNulls and other null management aspects of this would be good.
 
 #!csharp
 
+#r "nuget:Plotly.NET.CSharp"
+#r "nuget:Plotly.NET.Interactive"
+
+using Plotly.NET.CSharp;
+using Plotly.NET.Interactive;
+
+#!csharp
+
 // Save the DataFrame to a file
 DataFrame.SaveCsv(df, "credit_default_clean.csv");
 
@@ -104,19 +112,7 @@ DataFrame.SaveCsv(df, "credit_default_clean.csv");
 
 #!csharp
 
-//#r "nuget:Plotly.NET.CSharp"
-//#r "nuget:Plotly.NET.Interactive"
-
-//using Plotly.NET.CSharp;
-//using Plotly.NET.Interactive;
-
-#!csharp
-
-#r "nuget:XPlot.Plotly"
-#r "nuget:XPlot.Plotly.Interactive"
-
-#!csharp
-
+/*
 using XPlot.Plotly;
 using System.Linq;
 
@@ -130,6 +126,7 @@ Chart.Plot(
         title="Default Class Distribution",        
     }
 )
+*/
 
 #!csharp
 
