@@ -86,15 +86,17 @@ df.Info()
 #!csharp
 
 // Change the defaulted column to a boolean storing whether or not it has a 1
-df["Defaulted"] = df["Defaulted"].ElementwiseEquals(1)
-
-#!csharp
-
+df["Defaulted"] = df["Defaulted"].ElementwiseEquals(1);
 df["Defaulted"].ValueCounts()
 
 #!markdown
 
 Talking about FillNulls and other null management aspects of this would be good.
+
+#!csharp
+
+// Save the DataFrame to a file
+DataFrame.SaveCsv(df, "credit_default_clean.csv");
 
 #!markdown
 
@@ -102,13 +104,11 @@ Talking about FillNulls and other null management aspects of this would be good.
 
 #!csharp
 
-/*
-#r "nuget:Plotly.NET.CSharp"
-#r "nuget:Plotly.NET.Interactive"
+//#r "nuget:Plotly.NET.CSharp"
+//#r "nuget:Plotly.NET.Interactive"
 
-using Plotly.NET.CSharp;
-using Plotly.NET.Interactive;
-*/
+//using Plotly.NET.CSharp;
+//using Plotly.NET.Interactive;
 
 #!csharp
 
@@ -130,11 +130,6 @@ Chart.Plot(
         title="Default Class Distribution",        
     }
 )
-
-#!csharp
-
-// Save the DataFrame to a file
-DataFrame.SaveCsv(df, "credit_default_clean.csv");
 
 #!csharp
 
