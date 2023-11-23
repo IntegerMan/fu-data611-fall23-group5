@@ -105,9 +105,32 @@ Talking about FillNulls and other null management aspects of this would be good.
 //#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
 //#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
 
+#!fsharp
+
 open Deedle
 
 let df_vis = Frame.ReadCsv("credit_default_clean.csv")
+
+df_vis
+
+#!fsharp
+
+#r "nuget:FSharp.Data"
+
+#!fsharp
+
+dir
+
+#!fsharp
+
+open System
+open System.IO
+open FSharp.Data
+
+let dir = Environment.CurrentDirectory
+let path = Path.Combine(dir, "credit_default_clean.csv")
+
+let df_vis = CsvFile.Load(path)
 
 df_vis
 
@@ -180,14 +203,6 @@ GenericChart
     .ofTraceObject(true, trace)
     .WithLayout(layout)
     .Show()
-
-#!fsharp
-
-#r "nuget:FSharp.Data"
-#r "nuget:Deedle"
-
-#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
-#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
 
 #!fsharp
 
