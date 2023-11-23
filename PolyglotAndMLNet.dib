@@ -14,18 +14,14 @@ This notebook uses .NET and Polyglot Notebooks together to perform a binary clas
 
 #!csharp
 
-// Load a DataFrame from the dataset
-string dataUrl = "credit_default.csv";
+#r "nuget:Microsoft.Data.Analysis,0.21.0-preview.23511.1"
 
 #!csharp
-
-#r "nuget:Microsoft.Data.Analysis,0.21.0-preview.23511.1"
 
 using Microsoft.Data.Analysis;
 
-#!csharp
+DataFrame df = DataFrame.LoadCsv("credit_default.csv");
 
-DataFrame df = DataFrame.LoadCsv(dataUrl);
 df.Head(5)
 
 #!csharp
@@ -89,18 +85,6 @@ df.Info()
 df["Defaulted"] = df["Defaulted"].ElementwiseEquals(1);
 df["Defaulted"].ValueCounts()
 
-#!markdown
-
-Talking about FillNulls and other null management aspects of this would be good.
-
-#!csharp
-
-#r "nuget:Plotly.NET.CSharp"
-#r "nuget:Plotly.NET.Interactive"
-
-using Plotly.NET.CSharp;
-using Plotly.NET.Interactive;
-
 #!csharp
 
 // Save the DataFrame to a file
@@ -108,36 +92,136 @@ DataFrame.SaveCsv(df, "credit_default_clean.csv");
 
 #!markdown
 
+Talking about FillNulls and other null management aspects of this would be good.
+
+#!markdown
+
 ## Data Exploration
 
-#!csharp
+#!fsharp
 
-/*
-using XPlot.Plotly;
-using System.Linq;
+#r "nuget:Deedle"
 
-Chart.Plot(
-    new Histogram()
-    {
-        x = df["Defaulted"],
-        nbinsx = 30,        
-    },
-    new Layout.Layout() {
-        title="Default Class Distribution",        
-    }
+//#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
+//#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
+
+open Deedle
+
+let df_vis = Frame.ReadCsv("credit_default_clean.csv")
+
+df_vis
+
+#!fsharp
+
+#r "nuget: Plotly.NET.Interactive"
+
+#!fsharp
+
+open Plotly.NET
+
+Chart.Point(
+    x = [0 .. 10],
+    y = [0 .. 10]
 )
-*/
+|> Chart.withTitle "Hello World!"
+
+#!fsharp
+
+open Plotly.NET
+
+let matrix =
+    [ [ 1.; 1.5; 0.7; 2.7 ]; [ 2.; 0.5; 1.2; 1.4 ]; [ 0.1; 2.6; 2.4; 3.0 ] ]
+
+let rownames = [ "p3"; "p2"; "p1" ]
+let colnames = [ "Tp0"; "Tp30"; "Tp60"; "Tp160" ]
+
+// Generating the Heatmap with only z Data
+Chart.Heatmap(zData = matrix)
 
 #!csharp
+
+#r "nuget:Plotly.NET.CSharp"
+#r "nuget:Plotly.NET.Interactive"
+
+//using Plotly.NET.CSharp;
+//using Plotly.NET.Interactive;
+
+#!csharp
+
+using System;
+using Plotly.NET;
+using Plotly.NET.LayoutObjects;
+
+double[] x = new double[] { 1, 2 };
+double[] y = new double[] { 5, 10 };
+
+LinearAxis xAxis = new LinearAxis();
+xAxis.SetValue("title", "xAxis");
+xAxis.SetValue("showgrid", false);
+xAxis.SetValue("showline", true);
+
+LinearAxis yAxis = new LinearAxis();
+yAxis.SetValue("title", "yAxis");
+yAxis.SetValue("showgrid", false);
+yAxis.SetValue("showline", true);
+
+Layout layout = new Layout();
+layout.SetValue("xaxis", xAxis);
+layout.SetValue("yaxis", yAxis);
+layout.SetValue("showlegend", true);
+
+Trace trace = new Trace("scatter");
+trace.SetValue("x", x);
+trace.SetValue("y", y);
+trace.SetValue("mode", "markers");
+trace.SetValue("name", "Hello from C#");
+
+GenericChart
+    .ofTraceObject(true, trace)
+    .WithLayout(layout)
+    .Show()
+
+#!fsharp
 
 #r "nuget:FSharp.Data"
+#r "nuget:Deedle"
+
+#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
+#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
+
+#!fsharp
+
+// #!set --value @csharp:df --name df
 
 #!fsharp
 
 open FSharp.Data
 
-// Load the cleaned data
-let df = CsvFile.Load("credit_default_clean.csv", inferRows = 1000)
+// Load the CSV file into a DataFrame
+let new_df = CsvFile.Load("Credit_Default_Clean.csv", inferRows = 1000)
+
+new_df
+
+#!fsharp
+
+open System
+open Deedle
+
+// Migrate the C# DataFrame to an F# Frame
+let frame = Frame.ofDataFrame(df)
+
+frame
+
+#!csharp
+
+Chart.Plot(
+    new Graph.Bar()
+    {
+        x = df["Defaulted"].ValueCounts().Keys,
+        y = df["Defaulted"].ValueCounts().Values,
+        name = "Defaulted"
+    }
+);
 
 #!markdown
 
