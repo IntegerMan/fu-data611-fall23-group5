@@ -102,37 +102,26 @@ Talking about FillNulls and other null management aspects of this would be good.
 
 #r "nuget:Deedle"
 
-//#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
-//#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
+#!fsharp
+
+#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
+#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
 
 #!fsharp
 
 open Deedle
-
-let df_vis = Frame.ReadCsv("credit_default_clean.csv")
-
-df_vis
-
-#!fsharp
-
-#r "nuget:FSharp.Data"
-
-#!fsharp
-
-dir
-
-#!fsharp
-
 open System
 open System.IO
-open FSharp.Data
 
-let dir = Environment.CurrentDirectory
-let path = Path.Combine(dir, "credit_default_clean.csv")
+let filePath = Path.Combine(Environment.CurrentDirectory, "credit_default_clean.csv")
 
-let df_vis = CsvFile.Load(path)
-
+let df_vis = Frame.ReadCsv(filePath)
 df_vis
+
+#!fsharp
+
+let age_column = df_vis["Age"]
+age_column
 
 #!fsharp
 
@@ -142,101 +131,10 @@ df_vis
 
 open Plotly.NET
 
-Chart.Point(
-    x = [0 .. 10],
-    y = [0 .. 10]
-)
-|> Chart.withTitle "Hello World!"
-
-#!fsharp
-
-open Plotly.NET
-
-let matrix =
-    [ [ 1.; 1.5; 0.7; 2.7 ]; [ 2.; 0.5; 1.2; 1.4 ]; [ 0.1; 2.6; 2.4; 3.0 ] ]
-
-let rownames = [ "p3"; "p2"; "p1" ]
-let colnames = [ "Tp0"; "Tp30"; "Tp60"; "Tp160" ]
-
-// Generating the Heatmap with only z Data
-Chart.Heatmap(zData = matrix)
-
-#!csharp
-
-#r "nuget:Plotly.NET.CSharp"
-#r "nuget:Plotly.NET.Interactive"
-
-//using Plotly.NET.CSharp;
-//using Plotly.NET.Interactive;
-
-#!csharp
-
-using System;
-using Plotly.NET;
-using Plotly.NET.LayoutObjects;
-
-double[] x = new double[] { 1, 2 };
-double[] y = new double[] { 5, 10 };
-
-LinearAxis xAxis = new LinearAxis();
-xAxis.SetValue("title", "xAxis");
-xAxis.SetValue("showgrid", false);
-xAxis.SetValue("showline", true);
-
-LinearAxis yAxis = new LinearAxis();
-yAxis.SetValue("title", "yAxis");
-yAxis.SetValue("showgrid", false);
-yAxis.SetValue("showline", true);
-
-Layout layout = new Layout();
-layout.SetValue("xaxis", xAxis);
-layout.SetValue("yaxis", yAxis);
-layout.SetValue("showlegend", true);
-
-Trace trace = new Trace("scatter");
-trace.SetValue("x", x);
-trace.SetValue("y", y);
-trace.SetValue("mode", "markers");
-trace.SetValue("name", "Hello from C#");
-
-GenericChart
-    .ofTraceObject(true, trace)
-    .WithLayout(layout)
-    .Show()
-
-#!fsharp
-
-// #!set --value @csharp:df --name df
-
-#!fsharp
-
-open FSharp.Data
-
-// Load the CSV file into a DataFrame
-let new_df = CsvFile.Load("Credit_Default_Clean.csv", inferRows = 1000)
-
-new_df
-
-#!fsharp
-
-open System
-open Deedle
-
-// Migrate the C# DataFrame to an F# Frame
-let frame = Frame.ofDataFrame(df)
-
-frame
-
-#!csharp
-
-Chart.Plot(
-    new Graph.Bar()
-    {
-        x = df["Defaulted"].ValueCounts().Keys,
-        y = df["Defaulted"].ValueCounts().Values,
-        name = "Defaulted"
-    }
-);
+Chart.Histogram(X = age_column.Values) 
+    |> Chart.withTitle "Age Distribution"
+    |> Chart.withXAxisStyle ("Age", ShowGrid = true, ShowLine = false)
+    |> Chart.withYAxisStyle ("Count", ShowGrid = true, ShowLine = false)
 
 #!markdown
 
