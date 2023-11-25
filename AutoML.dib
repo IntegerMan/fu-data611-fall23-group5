@@ -10,190 +10,6 @@ This notebook uses .NET and Polyglot Notebooks together to perform a binary clas
 
 #!markdown
 
-## Data Loading
-
-#!csharp
-
-#r "nuget:Microsoft.Data.Analysis,0.21.0-preview.23511.1"
-
-#!csharp
-
-using Microsoft.Data.Analysis;
-
-DataFrame df = DataFrame.LoadCsv("credit_default.csv");
-
-df.Head(5)
-
-#!csharp
-
-df.Info()
-
-#!csharp
-
-df.Description()
-
-#!csharp
-
-df["X1"]
-
-#!csharp
-
-df["X1"].Description()
-
-#!csharp
-
-df["X1"].ValueCounts()
-
-#!markdown
-
-## Data Cleaning
-
-#!csharp
-
-// Rename columns to reflect actual data
-df["X1"].SetName("Credit Amount");
-df["X2"].SetName("Gender");
-df["X3"].SetName("Education");
-df["X4"].SetName("Marital Status");
-df["X5"].SetName("Age");
-df["X6"].SetName("Repay Delay Sep");
-df["X7"].SetName("Repay Delay Aug");
-df["X8"].SetName("Repay Delay Jul");
-df["X9"].SetName("Repay Delay Jun");
-df["X10"].SetName("Repay Delay May");
-df["X11"].SetName("Repay Delay Apr");
-df["X12"].SetName("Bill Sep");
-df["X13"].SetName("Bill Aug");
-df["X14"].SetName("Bill Jul");
-df["X15"].SetName("Bill Jun");
-df["X16"].SetName("Bill May");
-df["X17"].SetName("Bill Apr");
-df["X18"].SetName("Payment Sep");
-df["X19"].SetName("Payment Aug");
-df["X20"].SetName("Payment Jul");
-df["X21"].SetName("Payment Jun");
-df["X22"].SetName("Payment May");
-df["X23"].SetName("Payment Apr");
-df["Y"].SetName("Defaulted");
-
-// Display the new schema
-df.Info()
-
-#!csharp
-
-// Change the defaulted column to a boolean storing whether or not it has a 1
-df["Defaulted"] = df["Defaulted"].ElementwiseEquals(1);
-df["Defaulted"].ValueCounts()
-
-#!csharp
-
-// Save the DataFrame to a file
-DataFrame.SaveCsv(df, "credit_default_clean.csv");
-
-#!markdown
-
-Talking about FillNulls and other null management aspects of this would be good.
-
-#!csharp
-
-#r "nuget:ScottPlot"
-
-#!csharp
-
-// Setup a custom formatter to display plots as images
-using Microsoft.DotNet.Interactive.Formatting;
-Formatter.Register(typeof(ScottPlot.Plot), (p, w) => 
-    w.Write(((ScottPlot.Plot)p).GetImageHTML()), HtmlFormatter.MimeType);
-
-#!csharp
-
-using System.Linq;
-
-double[] dataX = df["Credit Amount"].GetEnumerator().ToEnumerable().Select(x => (double)x).ToArray();
-double[] dataY = df["Age"].ToList();
-
-// plot the data
-var plt = new ScottPlot.Plot(400, 300);
-plt.AddScatter(dataX, dataY);
-
-// display the plot
-plt
-
-#!csharp
-
-using ScottPlot;
-
-// Display a histogram
-var plt = new Plot(600, 400);
-plt.PlotBar(df["Credit Amount"].ValueCounts());
-
-#!markdown
-
-## Data Exploration
-
-#!fsharp
-
-#r "nuget:Deedle"
-
-#!fsharp
-
-#i "nuget:https://www.myget.org/F/gregs-experimental-packages/api/v3/index.json"
-#r "nuget:Deedle.DotNet.Interactive.Extension,0.1.0-alpha9"
-
-#!fsharp
-
-open Deedle
-open System
-open System.IO
-
-let filePath = Path.Combine(Environment.CurrentDirectory, "credit_default_clean.csv")
-
-let df_vis = Frame.ReadCsv(filePath)
-df_vis
-
-#!fsharp
-
-let age_column = df_vis["Age"]
-age_column
-
-#!fsharp
-
-#r "nuget: Plotly.NET.Interactive"
-
-#!fsharp
-
-open Plotly.NET
-
-Chart.Histogram(X = age_column.Values) 
-    |> Chart.withTitle "Age Distribution"
-    |> Chart.withXAxisStyle ("Age", ShowGrid = true, ShowLine = false)
-    |> Chart.withYAxisStyle ("Count", ShowGrid = true, ShowLine = false)
-
-#!markdown
-
-## Feature Engineering
-
-#!csharp
-
-df.Info()
-
-#!csharp
-
-df["Average Repay Delay"] = df["Repay Delay Sep"] + df["Repay Delay Aug"] + df["Repay Delay Jul"] + df["Repay Delay Jun"] + df["Repay Delay May"] + df["Repay Delay Apr"] / 6.0;
-df["Average Repay Delay"].Description()
-
-#!csharp
-
-// Drop the ID column
-df.Columns.Remove("ID");
-
-#!csharp
-
-// Save the DataFrame to a file
-DataFrame.SaveCsv(df, "credit_default_traintest.csv");
-
-#!markdown
-
 ## Train / Test Split
 
 #!csharp
@@ -325,8 +141,8 @@ AutoMLExperiment experiment = mlContext.Auto().CreateExperiment();
 experiment
     .SetPipeline(pipeline)
     .SetBinaryClassificationMetric(BinaryClassificationMetric.F1Score, labelColumn: columnInference.ColumnInformation.LabelColumnName)
-    .SetTrainingTimeInSeconds(10)
-    .SetDataset(trainValidationData);
+    .SetTrainingTimeInSeconds(30)
+    .SetDataset(trainValidationData.TrainSet);
 
 #!csharp
 
@@ -335,8 +151,26 @@ TrialResult experimentResults = await experiment.RunAsync();
 
 #!csharp
 
-experimentResults
+experimentResults.Metric
+
+#!csharp
+
+experimentResults.TrialSettings
+
+#!csharp
+
+var model = experimentResults.Model;
+model
 
 #!markdown
 
 ## Model Evaluation
+
+#!csharp
+
+BinaryClassificationMetrics metrics = mlContext.BinaryClassification.Evaluate(model.Transform(trainValidationData.TestSet), labelColumnName: columnInference.ColumnInformation.LabelColumnName);
+metrics
+
+#!csharp
+
+metrics.ConfusionMatrix.GetFormattedConfusionTable()
